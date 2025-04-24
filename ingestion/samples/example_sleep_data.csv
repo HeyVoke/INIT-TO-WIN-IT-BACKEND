@@ -1,0 +1,5 @@
+user_id,sleep_date,start_time,end_time,duration_minutes,deep_sleep_minutes,light_sleep_minutes,rem_sleep_minutes
+u001,2025-04-22,22:45,06:15,450,120,200,130
+u002,2025-04-22,23:30,07:r00,450,100,250,100
+u001,2025-04-23,22:50,06:30,460,130,210,120
+u002,2025-04-23,23:20,06:50,430,110,220,100
