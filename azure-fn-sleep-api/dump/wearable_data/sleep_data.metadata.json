@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"91982588577640acbf075b24d20bae49","collectionName":"sleep_data","type":"collection"}
