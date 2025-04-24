@@ -1,0 +1,99 @@
+# Steps to Take
+
+1. Collect Expected Data:
+    - Gather CSVs from the wearable.
+    - Export JSON files from your questionnaire.
+    - Collect text files or logs from diary entries.
+    - Will Cross-analyze questionnaire, sleep, and diary data.
+
+5. Hackathon Mode (Quick Setup):
+    - Store raw data in Blob Storage.
+    - Use Azure Functions or Logic Apps to transform data.
+    - Save processed data in Cosmos DB or SQLite on Azure.
+        - structured storage for efficient querying and joining
+
+2. Define App Features:
+    - Show user dashboards or trends (e.g., “Your REM sleep improved when you felt financially secure”).
+
+Suggested Repo Structure
+backend/
+│
+├── app/                            # Main FastAPI app
+│   ├── main.py                     # FastAPI entry point
+│   ├── api/                        # Route definitions
+│   │   ├── insights.py             # Routes for AI suggestions
+│   ├── services/                   # Core logic
+│   │   ├── blob_storage.py         # Upload/download wearable CSV files
+│   │   ├── mongo_db.py             # Interact with MongoDB
+│   │   ├── llm.py                  # Generate AI suggestions
+│   └── models/                     # Pydantic schemas
+│       ├── insights.py
+│       └── sleep.py
+│
+├── ingestion/                      # Scripts & automation for ingesting wearable CSV
+│   ├── upload_csv.py               # Upload CSV to mongoDB
+│   └── samples/                    # Example wearable tech CSVs (for hackathon)
+│       └── example_sleep_data.csv
+│
+├── azure_functions/               # Azure Functions (Blob trigger to clean CSV)
+│   ├── clean_sleep_data/          # Triggered when wearable CSV is uploaded
+│   │   ├── __init__.py
+│   │   ├── function.json
+│   │   └── processor.py           # Cleans & loads into MongoDB
+│   └── shared/                    # Shared utilities
+│       ├── utils.py
+│       └── config.py
+│
+├── requirements.txt
+├── host.json                      # For Azure Functions
+└── README.md
+
+
+🔁 **Flow Overview**
+
+- **Frontend sends raw data** → `POST /api/ingest` → FastAPI
+- **FastAPI (`ingest.py`)** calls `blob_storage.py` → uploads raw data to Blob
+- **Azure Function (`clean_data_func`)** is triggered (e.g., by Blob upload event):
+    - Downloads raw data
+    - Cleans and transforms it
+    - Saves clean data to MongoDB
+- **Later requests from frontend**:
+    - `/api/insights`: FastAPI loads clean data from MongoDB, prompts LLM
+    - `/api/sleep-analysis`: FastAPI runs sleep stats on clean MongoDB data
+
+---
+
+💬 **Azure Functions: Placement & Role**
+
+- **Separation**: Your Azure Functions are separate from FastAPI but can live in the same monorepo under the `azure_functions/` folder.
+- **Trigger Type**: Blob trigger
+- **Responsibilities**:
+    - Receive raw data blob
+    - Parse, clean, validate
+    - Store structured data into MongoDB
+- **Deployment**: If needed, you can deploy Azure Functions separately, independent of your FastAPI app on Azure App Service.
+
+---
+
+💡 **Tips**
+
+1. Use `.env` or a config manager for shared secrets across FastAPI and Azure Functions.
+2. If your AI model is hosted (e.g., Azure OpenAI or OpenAI API), wrap API calls in `services/llm.py`.
+3. For local development, use **Azurite** for Blob storage mocking.
+4. MongoDB access should be wrapped in reusable classes/functions — avoid raw queries in routes.
+
+
+Tasks:
+☐ Agree on the repo structure
+☐ Create a new repo
+☐ Data Ingestion + Storage:
+    ☐ Create a script to upload CSVs to Azure (Wearable data)
+    ☐ Create a script to upload survey JSONs to Azure (Questionnaire data)
+    ☐ Create a script to upload text files to Azure (Diary data)
+☐ Data Cleaning + Storage:
+    ☐ Create a script to clean and transform wearable CSVs (Azure Functions)
+☐ Create a script to generate insights using LLM - promt engineering etc.
+☐ Create a script to analyze sleep data (Will this be fed to the LLM?) - any key metrics like percantage of time in REM, etc.
+
+
+
